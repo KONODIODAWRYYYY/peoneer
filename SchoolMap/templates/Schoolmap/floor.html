@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset = "UTF - 8"/>
+	</head>
+	<body>
+		<ul>
+		{% for room in room_list %}
+			<li>{{ room.number }}</li>
+		{% endfor %}
+		</ul>
+	</body>
+</html>

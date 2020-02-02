@@ -1,0 +1,309 @@
+from kivy.app import App
+from kivy.config import Config
+from kivy.network.urlrequest import UrlRequest
+from kivy.storage.jsonstore import JsonStore
+import json
+
+
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition, FadeTransition
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.graphics import Color, Rectangle
+#from kivy.core.window import Window
+from kivy.clock import Clock
+
+from kivy.uix.button import Button
+from kivy.uix.widget import Widget
+from kivy.uix.label import Label
+from kivy.uix.image import Image, AsyncImage
+from kivy.uix.textinput import TextInput
+
+width = 360
+height = 640
+
+##Window.clearcolor = (.055,.0196,.086,1)
+##Window.clearcolor = None
+
+#Config.set('graphics','resizable','0')
+Config.set('graphics','width', width)
+Config.set('graphics','height',height)
+
+sm1 = ScreenManager(transition=FadeTransition())
+            
+store = JsonStore('hello.json')
+
+classes=['1','2','3','4','5','6','7','8','9','10','11']
+
+bukv_clas = ['Г','В','Б','А']
+
+nam_clas = 0
+
+nam_buk = len(bukv_clas)-1
+
+
+with sm1.canvas:
+            Color(.055,.0196,.0862)
+            Rectangle(size = [width,height] , pos = [0,0])
+
+class Loding(Screen):
+    def __init__(self, **kw):
+        super(Loding,self).__init__(**kw)
+        lbl = Label(text = 'Загрузка')
+        self.add_widget(lbl)
+        Clock.schedule_once(self.callback,7)
+        
+    def callback(self,dt):
+        if store.exists('pioner'):
+            sm1.current = 'menu'
+        else:
+            sm1.current = 'start'
+        
+        
+        
+class Start(Screen):
+    def __init__(self, **kw):
+        super(Start,self).__init__(**kw)
+        global bukv_clas
+        global classes
+        global nam_clas
+        global nam_buk
+        glS = GridLayout(cols=3)
+        glS.add_widget(Button(text = '^', on_press = self.bt_press_lb1_U ))
+        glS.add_widget(Button(text = '^', on_press = self.bt_press_lb2_U ))
+        glS.add_widget(Widget())
+        self.lb1= Label(text = classes[nam_clas])
+        glS.add_widget(self.lb1)
+        self.lb2 = Label(text = bukv_clas[nam_buk])
+        glS.add_widget(self.lb2)
+        glS.add_widget(Button(text = 'далее', on_press = self.bt_press ))
+        glS.add_widget(Button(text = 'v', on_press = self.bt_press_lb1_D ))
+        glS.add_widget(Button(text = 'v', on_press = self.bt_press_lb2_D ))
+        glS.add_widget(Widget())
+        self.add_widget(glS)
+    def bt_press(self,instance):
+        global bukv_clas
+        global classes
+        global nam_clas
+        global nam_buk
+        #print(bukv_clas[nam_buk])
+        store.put('pioner', name = bukv_clas[nam_buk], classe = classes[nam_clas])
+        #print(classes[nam_clas])
+        sm1.current = 'menu'
+        
+    def bt_press_lb1_U(self,instance):
+        global classes
+        global nam_clas
+        if (nam_clas == len(classes)-1):
+            nam_clas=0
+        else:
+            nam_clas= nam_clas+1
+            
+        self.lb1.text = classes[nam_clas]
+        
+    def bt_press_lb1_D(self,instance):
+        global classes
+        global nam_clas
+        if (nam_clas == 0):
+            nam_clas=len(classes)-1
+        else:
+            nam_clas= nam_clas-1
+            
+        self.lb1.text = classes[nam_clas]
+        
+    def bt_press_lb2_U(self,instance):
+        global bukv_clas
+        global nam_buk
+        if (nam_buk == len(bukv_clas)-1):
+            nam_buk=0
+        else:
+            nam_buk= nam_buk+1
+            
+        self.lb2.text = bukv_clas[nam_buk]
+        
+    def bt_press_lb2_D(self,instance):
+        global bukv_clas
+        global nam_buk
+        if (nam_buk == 0):
+            nam_buk=len(bukv_clas)-1
+        else:
+            nam_buk= nam_buk-1
+            
+        self.lb2.text = bukv_clas[nam_buk]
+
+class Menu(Screen):
+    def __init__(self, **kw):
+        super(Menu,self).__init__(**kw)
+        
+        blM = BoxLayout(orientation='vertical')
+
+        with blM.canvas:
+            Color(1,0,0,1)
+            
+        #back = Widget(color =  [1,0,0,1])
+        
+        sm2 = ScreenManager(transition=FadeTransition(), size_hint = [1,.2])
+        class Logo(Screen):
+            def __init__(self,**kw):
+                super(Logo,self).__init__(**kw)
+                self.add_widget(AsyncImage(source='Pioneer.png'))
+                
+        class Back(Screen):
+            def __init__(self,**kw):
+                super(Back,self).__init__(**kw)
+                self.add_widget(Button(text = 'назд', on_press = self.bt_press))
+            def bt_press(self,instance):
+                sm2.current = 'logo'
+                sm3.current = 'base'
+                
+        sm2.add_widget(Logo(name = 'logo'))
+        sm2.add_widget(Back(name = 'back'))
+        blM.add_widget(sm2)
+
+        sm3 = ScreenManager(transition=FadeTransition(), )
+        class Base(Screen):
+            def __init__(self,**kw):
+                super(Base,self).__init__(**kw)
+                glM = GridLayout(cols=2)
+                #for e in range(6):
+                    #but = Button(on_press = self.bt_press)
+                but1 = Button(on_press = self.bt1_press)
+                #but1.add_widget(AsyncImage(source='Krug_Maly.png'))
+                #but1.add_widget(Button(on_press = self.bt_press))
+                glM.add_widget(but1)
+
+                but2 = Button(on_press = self.bt2_press)
+                #but1.add_widget(AsyncImage(source='Krug_Maly.png'))
+                #but2.add_widget(AsyncImage(source='Krug_Maly.png'))
+                glM.add_widget(but2)
+
+                but3 = Button(on_press = self.bt3_press)
+                #but1.add_widget(AsyncImage(source='Krug_Maly.png'))
+                #but3.add_widget(AsyncImage(source='Krug_Maly.png'))
+                glM.add_widget(but3)
+
+                but4 = Button(on_press = self.bt4_press)
+                #but1.add_widget(AsyncImage(source='Krug_Maly.png'))
+                #but4.add_widget(AsyncImage(source='Krug_Maly.png'))
+                glM.add_widget(but4)
+
+                but5 = Button(on_press = self.bt5_press)
+                #but1.add_widget(AsyncImage(source='Krug_Maly.png'))
+                #but5.add_widget(AsyncImage(source='Krug_Maly.png'))
+                glM.add_widget(but5)
+
+                but6 = Button(on_press = self.bt6_press)
+                #but1.add_widget(AsyncImage(source='Krug_Maly.png'))
+                #but6.add_widget(AsyncImage(source='Krug_Maly.png'))
+                glM.add_widget(but6)
+                
+                self.add_widget(glM)
+            def bt_press(self,instance):
+                sm2.current = 'back'
+                sm3.current = 'map'
+
+            def bt1_press(self,instance):
+                req = UrlRequest('http://192.168.43.9:8000/schoolmap/26?format=json', got_json1)
+                sm2.current = 'back'
+                sm3.current = 'orig'
+
+            def bt2_press(self,instance):
+                req =  UrlRequest('http://192.168.43.9:8000/schoolmap/14?format=json', got_json2)
+                sm2.current = 'back'
+                sm3.current = 'map'
+
+            def bt3_press(self,instance):
+                sm2.current = 'back'
+                sm3.current = 'dop'
+
+            def bt4_press(self,instance):
+                sm2.current = 'back'
+                sm3.current = 'hero'
+
+            def bt5_press(self,instance):
+                sm2.current = 'back'
+                sm3.current = 'fablab'
+
+            def bt6_press(self,instance):
+                #sm2.current = 'back'
+                #sm3.current = 'smen_class'
+                sm1.current = 'start'
+
+        def got_json1(req,result):
+            print(result['introduce'])
+
+        def got_json2(req,result):
+            print(result['introduce'])
+
+            
+
+        class Map(Screen):
+            def __init__(self,**kw):
+                super(Map,self).__init__(**kw)
+                f_bl = BoxLayout(orientation='vertical')
+                f_bl.add_widget(TextInput())
+                f_bl.add_widget(Button())
+                self.add_widget(f_bl)
+
+        class Classes_orig(Screen):
+            def __init__(self,**kw):
+                super(Classes_orig,self).__init__(**kw)
+                f_bl = BoxLayout(orientation='vertical')
+                self.labl = Label()
+                f_bl.add_widget(self.labl)
+                s_bl = BoxLayout(orientation='horizontal')
+                s_bl.add_widget(Button())
+                s_bl.add_widget(Button())
+                f_bl.add_widget(s_bl)
+                self.add_widget(f_bl)
+                
+        class Classes_dop(Screen):
+            def __init__(self,**kw):
+                super(Classes_dop,self).__init__(**kw)
+                f_bl = BoxLayout(orientation='vertical')
+                self.labl = Label()
+                f_bl.add_widget(self.labl)
+                s_bl = BoxLayout(orientation='horizontal')
+                s_bl.add_widget(Button())
+                s_bl.add_widget(Button())
+                f_bl.add_widget(s_bl)
+                self.add_widget(f_bl)
+
+        class Hero(Screen):
+            def __init__(self,**kw):
+                super(Hero,self).__init__(**kw)
+                self.add_widget(Label(text = 'Создатели'))
+
+        class FabLab(Screen):
+            def __init__(self,**kw):
+                super(FabLab,self).__init__(**kw)
+                self.add_widget(Label(text = 'Фаблаб'))
+
+        class Smen_class(Screen):
+            def __init__(self,**kw):
+                super(Smen_class,self).__init__(**kw)
+                self.clas_lab=Label(text = 'Твой класс')
+                self.add_widget(self.clas_lab)
+            def on_pre_enter(self):
+                self.clas_lab.text = store.get('pioner')['classe']+' '+store.get('pioner')['name']
+                
+        sm3.add_widget(Base(name = 'base'))
+        sm3.add_widget(Map(name = 'map'))
+        sm3.add_widget(Classes_orig(name = 'orig'))
+        sm3.add_widget(Classes_dop(name = 'dop'))
+        sm3.add_widget(Hero(name = 'hero'))
+        sm3.add_widget(FabLab(name = 'fablab'))
+        sm3.add_widget(Smen_class(name = 'smen_class'))
+        blM.add_widget(sm3)
+        
+        self.add_widget(blM)
+        
+sm1.add_widget(Loding(name = 'loding'))
+sm1.add_widget(Start(name = 'start'))
+sm1.add_widget(Menu(name = 'menu'))
+
+class PionerApp(App):
+    def build(self):
+        return sm1
+if __name__ == "__main__":
+    PionerApp().run()
